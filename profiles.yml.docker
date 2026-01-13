@@ -1,0 +1,47 @@
+# =============================================================================
+# profiles.yml for Docker/Airflow Environment
+# =============================================================================
+# PURPOSE:
+#   dbt profile configuration for running inside Docker containers.
+#   Uses environment variables for credentials (no hardcoding).
+#
+# USAGE:
+#   Copy to /opt/dbt/profiles.yml in Docker container
+#   Or mount as volume in docker-compose
+# =============================================================================
+
+rental_property:
+  target: prod
+  outputs:
+    prod:
+      type: snowflake
+      account: "{{ env_var('SNOWFLAKE_ACCOUNT') }}"
+      user: "{{ env_var('SNOWFLAKE_USER', 'dbt') }}"
+      role: TRANSFORM
+      warehouse: COMPUTE_WH
+      database: RENTAL_PROPERTY
+      schema: development
+      threads: 4
+      
+      # Key-pair authentication (recommended for service accounts)
+      private_key_path: "{{ env_var('SNOWFLAKE_PRIVATE_KEY_PATH') }}"
+      private_key_passphrase: "{{ env_var('SNOWFLAKE_PRIVATE_KEY_PASSPHRASE') }}"
+      
+      client_session_keep_alive: false
+      query_tag: 'dbt-airflow'
+
+    dev:
+      type: snowflake
+      account: "{{ env_var('SNOWFLAKE_ACCOUNT') }}"
+      user: "{{ env_var('SNOWFLAKE_USER', 'dbt') }}"
+      role: TRANSFORM
+      warehouse: COMPUTE_WH
+      database: RENTAL_PROPERTY
+      schema: development
+      threads: 1
+      
+      private_key_path: "{{ env_var('SNOWFLAKE_PRIVATE_KEY_PATH') }}"
+      private_key_passphrase: "{{ env_var('SNOWFLAKE_PRIVATE_KEY_PASSPHRASE') }}"
+      
+      client_session_keep_alive: false
+      query_tag: 'dbt-dev'

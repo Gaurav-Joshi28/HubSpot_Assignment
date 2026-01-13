@@ -1,0 +1,178 @@
+version: 2
+
+models:
+  # ============================================
+  # DIMENSION TABLES
+  # ============================================
+  
+  - name: dim_date
+    description: |
+      Date dimension table with comprehensive calendar attributes.
+      Supports fiscal year, holidays, seasons, and period-over-period analysis.
+    columns:
+      - name: date_day
+        description: Primary key - the calendar date
+        tests:
+          - unique
+          - not_null
+      - name: date_key
+        description: Integer key (YYYYMMDD format) for joining
+        tests:
+          - unique
+          - not_null
+      - name: is_weekend
+        description: True if Saturday or Sunday
+        tests:
+          - not_null
+      - name: season
+        description: Season name (Winter, Spring, Summer, Fall)
+        tests:
+          - accepted_values:
+              values: ['Winter', 'Spring', 'Summer', 'Fall']
+  
+  - name: dim_hosts
+    description: |
+      Host dimension with SCD Type 2 history tracking.
+      Tracks host attribute changes over time.
+    columns:
+      - name: host_sk
+        description: Surrogate key for the host dimension
+        tests:
+          - unique
+          - not_null
+      - name: host_id
+        description: Natural/business key for the host
+        tests:
+          - not_null
+      - name: host_experience_tier
+        description: Calculated host experience level
+        tests:
+          - accepted_values:
+              values: ['New Host', 'Established Host', 'Veteran Host']
+      - name: is_current
+        description: Flag indicating if this is the current record
+        tests:
+          - not_null
+  
+  - name: dim_listings
+    description: |
+      Listing dimension with SCD Type 2 history tracking.
+      Includes point-in-time correct amenities.
+    columns:
+      - name: listing_sk
+        description: Surrogate key for the listing dimension
+        tests:
+          - unique
+          - not_null
+      - name: listing_id
+        description: Natural/business key for the listing
+        tests:
+          - not_null
+      - name: base_price
+        description: Base nightly price for the listing
+      - name: capacity_tier
+        description: Grouping by accommodation capacity
+        tests:
+          - accepted_values:
+              values: ['Small (1-2)', 'Medium (3-4)', 'Large (5-6)', 'Extra Large (7+)']
+      - name: price_tier
+        description: Grouping by base price
+        tests:
+          - accepted_values:
+              values: ['Budget', 'Economy', 'Mid-Range', 'Premium', 'Luxury']
+      - name: rating_tier
+        description: Grouping by review rating
+        tests:
+          - accepted_values:
+              values: ['Exceptional', 'Excellent', 'Good', 'Average', 'Below Average']
+              config:
+                severity: warn
+      - name: is_current
+        description: Flag indicating if this is the current record
+        tests:
+          - not_null
+
+  # ============================================
+  # FACT TABLES
+  # ============================================
+  
+  - name: fct_daily_listing_performance
+    description: |
+      Primary fact table at day/listing grain.
+      Contains revenue, occupancy, pricing, and point-in-time amenity data.
+      Materialized as incremental table for performance.
+      
+      OCCUPANCY DEFINITION:
+        - is_occupied = 1: Listing was reserved on this date
+        - is_occupied = 0: Listing was NOT reserved (could be available OR blocked)
+        - Occupancy rate = occupied_nights / (occupied_nights + available_nights)
+        - Note: Blocked nights are excluded from occupancy rate calculation
+    columns:
+      - name: listing_id
+        description: Foreign key to dim_listings
+        tests:
+          - not_null
+      - name: calendar_date
+        description: The date of this record
+        tests:
+          - not_null
+      - name: date_key
+        description: Integer date key for joining to dim_date
+        tests:
+          - not_null
+      - name: daily_revenue
+        description: Revenue for this day (price if reserved, else 0)
+      - name: adjusted_price
+        description: Adjusted/actual price for this date
+      - name: is_occupied
+        description: Binary flag (1 = occupied, 0 = not)
+        tests:
+          - accepted_values:
+              values: [0, 1]
+      - name: available_flag
+        description: Binary flag (1 = available, 0 = not)
+        tests:
+          - accepted_values:
+              values: [0, 1]
+      - name: is_blocked
+        description: Binary flag (1 = blocked by host, 0 = not)
+        tests:
+          - accepted_values:
+              values: [0, 1]
+  
+  - name: fct_monthly_listing_performance
+    description: |
+      Pre-aggregated monthly metrics per listing.
+      Use for monthly dashboards and trend analysis.
+      30x smaller than daily fact table.
+    columns:
+      - name: listing_id
+        description: Foreign key to dim_listings
+        tests:
+          - not_null
+      - name: calendar_month
+        description: First day of the month
+        tests:
+          - not_null
+      - name: total_revenue
+        description: Total monthly revenue
+      - name: occupancy_rate_pct
+        description: Percentage of nights occupied (excludes blocked)
+  
+  - name: fct_monthly_neighborhood_summary
+    description: |
+      Pre-aggregated monthly metrics by neighborhood.
+      Use for executive dashboards and market analysis.
+    columns:
+      - name: neighborhood
+        description: Neighborhood name
+        tests:
+          - not_null
+      - name: calendar_month
+        description: First day of the month
+        tests:
+          - not_null
+      - name: total_revenue
+        description: Total neighborhood monthly revenue
+      - name: avg_occupancy_rate_pct
+        description: Average occupancy rate across listings

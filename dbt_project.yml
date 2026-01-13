@@ -1,0 +1,39 @@
+name: 'rental_property'
+version: '1.0.0'
+
+profile: 'rental_property'
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+query-comment:
+  comment: "dbt rental_property_analytics"
+  append: true
+
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  rental_property:
+    staging:
+      +materialized: view
+      +schema: stagging
+    
+    intermediate:
+      +materialized: view
+      +schema: development
+    
+    marts:
+      +materialized: table
+      +schema: mart
+    
+    # Analysis/question answer views
+    analyses:
+      +materialized: view
+      +schema: analytics

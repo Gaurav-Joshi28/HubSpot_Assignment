@@ -1,0 +1,133 @@
+version: 2
+
+models:
+  - name: stg_listings
+    description: >
+      Cleaned and standardized listing data with parsed amenity boolean flags.
+      One row per listing.
+    columns:
+      - name: listing_id
+        description: Primary key - unique identifier for the listing
+        tests:
+          - unique
+          - not_null
+      - name: listing_name
+        description: Display name of the property
+      - name: neighborhood
+        description: Neighborhood where the property is located
+      - name: property_type
+        description: Type of property (e.g., Apartment, House, Condo)
+      - name: room_type
+        description: Type of room being rented (Entire home, Private room, etc.)
+      - name: accommodates
+        description: Maximum number of guests the listing can accommodate
+      - name: bedrooms
+        description: Number of bedrooms
+      - name: beds
+        description: Number of beds
+      - name: bathrooms
+        description: Number of bathrooms (parsed from text)
+      - name: host_id
+        description: Unique identifier for the host
+      - name: host_name
+        description: Name of the host
+      - name: host_since_date
+        description: Date when the host joined the platform
+      - name: base_price
+        description: Base nightly price for the listing
+      - name: has_air_conditioning
+        description: Boolean flag indicating if listing has air conditioning
+      - name: has_lockbox
+        description: Boolean flag indicating if listing has a lockbox for self check-in
+      - name: has_first_aid_kit
+        description: Boolean flag indicating if listing has a first aid kit
+      - name: has_wifi
+        description: Boolean flag indicating if listing has wifi
+      - name: has_kitchen
+        description: Boolean flag indicating if listing has a kitchen
+      - name: has_parking
+        description: Boolean flag indicating if listing has parking
+      - name: has_pool
+        description: Boolean flag indicating if listing has a pool
+      - name: has_heating
+        description: Boolean flag indicating if listing has heating
+
+  - name: stg_calendar
+    description: >
+      Daily availability and pricing data per listing. 
+      One row per listing per date.
+    columns:
+      - name: listing_id
+        description: Foreign key to stg_listings
+        tests:
+          - not_null
+      - name: calendar_date
+        description: The date this record applies to
+        tests:
+          - not_null
+      - name: is_available
+        description: Whether the listing is available for booking on this date
+      - name: is_reserved
+        description: Whether there is a confirmed reservation for this date
+      - name: reservation_id
+        description: Unique identifier for the reservation (if any)
+      - name: daily_price
+        description: The price for this specific date (may differ from base price)
+      - name: minimum_nights
+        description: Minimum nights required to book (host setting)
+      - name: maximum_nights
+        description: Maximum nights allowed for a stay (host setting)
+      - name: calendar_month
+        description: First day of the month for this date
+      - name: calendar_year
+        description: First day of the year for this date
+      - name: is_weekend
+        description: Boolean indicating Saturday or Sunday
+
+  - name: stg_reviews
+    description: >
+      Generated review data with scores.
+      One row per review.
+    columns:
+      - name: review_id
+        description: Primary key - unique identifier for the review
+        tests:
+          - unique
+          - not_null:
+              config:
+                severity: warn
+                # Note: 2 null review_ids exist in source data
+      - name: listing_id
+        description: Foreign key to stg_listings
+        tests:
+          - not_null
+      - name: review_score
+        description: Numeric review score
+      - name: review_date
+        description: Date when the review was submitted
+      - name: review_month
+        description: First day of the month for the review date
+      - name: review_year
+        description: First day of the year for the review date
+
+  - name: stg_amenities_changelog
+    description: >
+      Historical record of amenity changes per listing.
+      One row per amenity change event.
+    columns:
+      - name: listing_id
+        description: Foreign key to stg_listings
+        tests:
+          - not_null
+      - name: change_at
+        description: Date when amenities were updated
+        tests:
+          - not_null
+      - name: amenities_raw
+        description: Raw JSON array of amenities at this point in time
+      - name: has_air_conditioning
+        description: Boolean flag indicating if listing had air conditioning at this time
+      - name: has_lockbox
+        description: Boolean flag indicating if listing had a lockbox at this time
+      - name: has_first_aid_kit
+        description: Boolean flag indicating if listing had a first aid kit at this time
