@@ -3,7 +3,7 @@ rental_property:
   outputs:
     dev:
       type: snowflake
-      account: htboygj-gzb78270   # add region if required
+      account: <Your Snowflake Account>   # add region if required
 
       user: dbt
       role: TRANSFORM               # using TRANSFORM role
@@ -12,37 +12,7 @@ rental_property:
       schema: development         # fixed typo
       threads: 1
 
-      private_key: 
-        -----BEGIN ENCRYPTED PRIVATE KEY-----
-        MIIFJDBWBgkqhkiG9w0BBQ0wSTAxBgkqhkiG9w0BBQwwJAQQ4MOJAr8bX/8vALDf
-        aoT4kwICCAAwDAYIKoZIhvcNAgkFADAUBggqhkiG9w0DBwQI8bNyaIHPZeMEggTI
-        mR8wkiuA5Kx9CKr9YkP36n384YhhLSS2i7vloOQif9NP66mJ839NFjVB4VAZmXNC
-        ADcIzSLhFX2QWviFV7W8q4khD7NXut3sh4gjqmnDlQYViEHP3xg4IIQzbuBiN3Hn
-        8xkWpv94XbR+aihrIaY6g67SSXxdYiU2H94XliOirCS/aPRJXJ2GL3mXxDh57e7n
-        h7U2DFioPdGD7lK/AOmxzzDUQNPju4Nni/pw8Q/1bKOXn5jUP5ggrpy97zmGKqTz
-        EBNd+i4NdEdYBB7RvFeyxwMLltVrNeW843D2MRSgT+EVrB/f0Ejd64JbdbeqQwXr
-        GVeaUOd/+LOUNWHtUtiVwxj2is3FbD6LsHZrNuNIoaJvtDTMITaQHfbSm5tzPrfD
-        JEPPYUAc3IFpQ2PmPASIOW00kcXpGIGorFZTDv5rGqz0342liOdn7U4xbuMTU9AK
-        uJqagpI3uA1uZAgMXfkzvuLr2gltOLP9vGFqjgNC/rhGLxJwj5eYsnEif1wQmRyt
-        Kdle2ry0zoGC42V3K0j0QfaP8N4QIr5T3eZLs5Cpu4lcHoj4lleN4jJfzLEoEFq0
-        YfmG8EahfnB5gu1ijUkSDc2x6d5LHhXOPSVUCWlNbMeYAwYrmLPE3Wh0KHk2YtNk
-        L0RnKmvQD5i1iDH24GkW+NyJ3WKowtC2RM0Lu9yFloktuqiK+CJkN22A4lf5o62t
-        oxs5YdMhlSBgSLgg1mWaSJ4NbWcnB8hpKUe9yaO1rR8grH6KND13YiIBDafn2CUd
-        2KpSUahz6rvMSbHziBzdwyogThwEMiBNyREf0hvSSEJejPyw09wEnxedA92OdNaI
-        /MNqsMbwxX2Aq+Jmttw1OHpd2bRfXCWlA67MrfvZ55QBIOc6ott0ys5WiWk9pLhI
-        NgEVYjsVERx/db+CYmw/26rQNI606wWDhkZZ+P/OrU301itwSN5qJPy4+AN+kco6
-        HBtijL7kfkXN+tdN+LkDM3PGxJIlmXN1aCAK9GnCj3L/mHqP0AlEJJO0j5d2vaCY
-        VBd4+2TKSMlb8d921IK6da2MdLC795U0uNST3Os/hfNh30V5OvnI/CQ8vCj9j7Sg
-        EY4KUA7EAByCOYKH6lpukcTDi0YGCzztLpZfj4Wj1IJqWBVWTX984gTuuMNLW2fK
-        iFsXJitoK6lhX8vVG78w75v9v3j1GprDMaXAsAN0MyWyOU9/syT21GvQXGFfeLyw
-        1ePT36LzdrnoSgaXOI/S9qlEzu9jHPLcY8ksrurwnbG473QGSw8Qjx02yvIECD0W
-        JAOAHpix3pp7GRKaTgccrEvUmUJSfytZuwQZzj8znAyDnu4pf2APofMyhcHC2EV6
-        Y+XuKOVDHHEp6nu482QlW1OsGGEmw0vs0/AsSiMqtvoqaNQgQmTQcFeWpAZmtvjg
-        TKMU/sJHPMq3yoqr3wLuN+a0YgGiI+r6kiEVRauxM2BsQKVUUvKitONURnS+mV4W
-        6VEjsjuSfdFkUUg5deKF4fPuIHpCrXjjQl+y0cX9Ui/szG/S1WSsEL2obXhNGjeJ
-        WReabHcFIivVVafnN31tFIVJwc559+1IwpSHpPlq6+VuCKF88EjhNrfF1xnvjIIF
-        Dleq/SiN3hn5C/TSle5PSXoHZYHOimSO
-        -----END ENCRYPTED PRIVATE KEY-----
+      private_key: < Your Private Key >
       private_key_passphrase: admin
 
       client_session_keep_alive: false
