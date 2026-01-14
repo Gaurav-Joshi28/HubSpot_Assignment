@@ -1050,15 +1050,29 @@ open http://localhost:8080  # admin / admin
 
 ## 🧪 Tests & Data Quality
 
-| Level | Scope | Key tests (examples) |
-|-------|-------|----------------------|
-| Sources (`raw.*`) | Freshness + key columns | Freshness on `_loaded_at`; `unique`/`not_null` on `listings.id`; `not_null` on `calendar.date`/`listing_id`; `unique`+`not_null` (warn) on `generated_reviews.id`; `not_null` on `amenities_changelog` `listing_id`/`change_at`/`amenities`. |
-| Staging | Cleaned views | `unique`/`not_null` on `stg_listings.listing_id`; `not_null` on `stg_calendar.listing_id`/`calendar_date`; `unique` + `not_null` (warn) on `stg_reviews.review_id`; `not_null` on `stg_amenities_changelog.listing_id`/`change_at`. |
-| Intermediate | SCD prep + spans | `not_null` on `int_listing_amenities_scd` `listing_id`/`valid_from`/`valid_to`; `int_calendar_enriched` `listing_id`/`calendar_date`; `int_availability_spans` `listing_id`/`span_start_date`/`span_end_date`; `int_hosts_history.host_id` `unique`/`not_null`; `valid_from`/`valid_to` not_null; same for `int_listings_history`. |
-| Marts (Dims) | `dim_date`, `dim_hosts`, `dim_listings` | `unique`/`not_null` on keys; accepted values on `season`, `host_experience_tier`, capacity/price/rating tiers (rating tier warn severity); `is_current` not_null on SCD dims. |
-| Marts (Facts) | `fct_daily_listing_performance`, `fct_monthly_listing_performance`, `fct_monthly_neighborhood_summary` | `not_null` on grain keys (`listing_id`, `calendar_date`/`calendar_month`, `date_key`, `neighborhood`); accepted values [0,1] for `is_occupied`, `available_flag`, `is_blocked`. |
-| Ops controls | Freshness & backfill gating | `dbt source freshness`; `check_late_arrivals` macro; schema-change detection macro + `on_schema_change='sync_all_columns'` on incremental fact. |
-| Singular tests | Custom SQL | `tests/` directory is currently empty (no extra singular tests beyond the YAML-defined ones). |
+| Level | Scope | Table/Model | Column tests (combination) |
+|-------|-------|-------------|-----------------------------|
+| Sources (`raw.*`) | Freshness + keys | `raw.listings` | Freshness `_loaded_at`; `id` unique + not_null; `host_id` not_null |
+| Sources (`raw.*`) | Freshness + keys | `raw.calendar` | Freshness `_loaded_at`; `listing_id`, `date`, `available` not_null |
+| Sources (`raw.*`) | Freshness + keys | `raw.generated_reviews` | Freshness `_loaded_at`; `id` unique + not_null (warn); `listing_id`, `review_score`, `review_date` present |
+| Sources (`raw.*`) | Freshness + keys | `raw.amenities_changelog` | Freshness `_loaded_at`; `listing_id`, `change_at`, `amenities` not_null |
+| Staging | Cleaned views | `stg_listings` | `listing_id` unique + not_null |
+| Staging | Cleaned views | `stg_calendar` | `listing_id`, `calendar_date` not_null |
+| Staging | Cleaned views | `stg_reviews` | `review_id` unique + not_null (warn); `listing_id` not_null |
+| Staging | Cleaned views | `stg_amenities_changelog` | `listing_id`, `change_at` not_null |
+| Intermediate | SCD prep + spans | `int_listing_amenities_scd` | `listing_id`, `valid_from`, `valid_to` not_null |
+| Intermediate | Enriched calendar | `int_calendar_enriched` | `listing_id`, `calendar_date` not_null |
+| Intermediate | Availability spans | `int_availability_spans` | `listing_id`, `span_start_date`, `span_end_date` not_null |
+| Intermediate | Host history | `int_hosts_history` | `host_id` unique + not_null; `valid_from`, `valid_to` not_null |
+| Intermediate | Listing history | `int_listings_history` | `listing_id`, `valid_from`, `valid_to` not_null |
+| Marts (dims) | Star dims | `dim_date` | `date_day` unique + not_null; `date_key` unique + not_null; `season` accepted values; `is_weekend` not_null |
+| Marts (dims) | Star dims | `dim_hosts` | `host_sk` unique + not_null; `host_id` not_null; `host_experience_tier` accepted values; `is_current` not_null |
+| Marts (dims) | Star dims | `dim_listings` | `listing_sk` unique + not_null; `listing_id` not_null; capacity/price/rating tiers accepted values (rating tier warn); `is_current` not_null |
+| Marts (facts) | Fact grain integrity | `fct_daily_listing_performance` | `listing_id`, `calendar_date`, `date_key` not_null; `is_occupied`, `available_flag`, `is_blocked` accepted values [0,1] |
+| Marts (facts) | Fact grain integrity | `fct_monthly_listing_performance` | `listing_id`, `calendar_month` not_null |
+| Marts (facts) | Fact grain integrity | `fct_monthly_neighborhood_summary` | `neighborhood`, `calendar_month` not_null |
+| Ops controls | Run gating | freshness run, `check_late_arrivals`, schema-change macro | Freshness thresholds; late-arrival detection; schema diff + `on_schema_change='sync_all_columns'` on incremental fact |
+| Singular tests | Custom SQL | `tests/` directory | Currently empty (no extra singular tests beyond YAML-defined) |
 
 ---
 
