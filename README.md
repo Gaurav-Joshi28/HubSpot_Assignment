@@ -27,6 +27,10 @@ Built with **dbt + Snowflake + Airflow** | Dynamic Amenity Parsing | SCD Type 2 
 
 ## 🚀 Pipeline Architecture
 
+**Architecture style:** Medallion-inspired layering  
+- Raw ↔ Stagging ↔ Development ↔ Mart ↔ Analytics mirrors Bronze/Silver/Gold+ semantics for controlled refinement.  
+- Mart layer uses a star schema (facts with conformed dimensions) to keep BI-friendly joins and predictable grain.
+
 ### Airflow DAG Overview
 
 ```
