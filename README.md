@@ -17,6 +17,11 @@ Built with **dbt + Snowflake + Airflow** | Dynamic Amenity Parsing | SCD Type 2 
 7. [Snowflake Setup](#-snowflake-setup)
 8. [Running the Project](#-running-the-project)
 9. [Monitoring & Alerts](#-monitoring--alerts)
+10. [Audit Timestamps & Data Lineage](#-audit-timestamps--data-lineage)
+11. [Join Strategy & Performance Optimizations](#-join-strategy--performance-optimizations)
+12. [Edge Cases & Future Enhancements](#-edge-cases--future-enhancements)
+    - [Future Enhancement Opportunities](#future-enhancement-opportunities)
+    - [Production Readiness Checklist](#production-readiness-checklist)
 
 ---
 
