@@ -19,6 +19,7 @@ Built with **dbt + Snowflake + Airflow** | Dynamic Amenity Parsing | SCD Type 2 
 9. [Monitoring & Alerts](#-monitoring--alerts)
 10. [Audit Timestamps & Data Lineage](#-audit-timestamps--data-lineage)
 11. [Join Strategy & Performance Optimizations](#-join-strategy--performance-optimizations)
+12. [Tests & Data Quality](#-tests--data-quality)
 12. [Edge Cases & Future Enhancements](#-edge-cases--future-enhancements)
     - [Future Enhancement Opportunities](#future-enhancement-opportunities)
     - [Production Readiness Checklist](#production-readiness-checklist)
@@ -1044,6 +1045,20 @@ open http://localhost:8080  # admin / admin
 | ✅ Fresh | Continues | None |
 | ⚠️ Warning | Continues | Log warning |
 | 🚨 Stale | **Blocked** | Email sent |
+
+---
+
+## 🧪 Tests & Data Quality
+
+| Level | Scope | Key tests (examples) |
+|-------|-------|----------------------|
+| Sources (`raw.*`) | Freshness + key columns | Freshness on `_loaded_at`; `unique`/`not_null` on `listings.id`; `not_null` on `calendar.date`/`listing_id`; `unique`+`not_null` (warn) on `generated_reviews.id`; `not_null` on `amenities_changelog` `listing_id`/`change_at`/`amenities`. |
+| Staging | Cleaned views | `unique`/`not_null` on `stg_listings.listing_id`; `not_null` on `stg_calendar.listing_id`/`calendar_date`; `unique` + `not_null` (warn) on `stg_reviews.review_id`; `not_null` on `stg_amenities_changelog.listing_id`/`change_at`. |
+| Intermediate | SCD prep + spans | `not_null` on `int_listing_amenities_scd` `listing_id`/`valid_from`/`valid_to`; `int_calendar_enriched` `listing_id`/`calendar_date`; `int_availability_spans` `listing_id`/`span_start_date`/`span_end_date`; `int_hosts_history.host_id` `unique`/`not_null`; `valid_from`/`valid_to` not_null; same for `int_listings_history`. |
+| Marts (Dims) | `dim_date`, `dim_hosts`, `dim_listings` | `unique`/`not_null` on keys; accepted values on `season`, `host_experience_tier`, capacity/price/rating tiers (rating tier warn severity); `is_current` not_null on SCD dims. |
+| Marts (Facts) | `fct_daily_listing_performance`, `fct_monthly_listing_performance`, `fct_monthly_neighborhood_summary` | `not_null` on grain keys (`listing_id`, `calendar_date`/`calendar_month`, `date_key`, `neighborhood`); accepted values [0,1] for `is_occupied`, `available_flag`, `is_blocked`. |
+| Ops controls | Freshness & backfill gating | `dbt source freshness`; `check_late_arrivals` macro; schema-change detection macro + `on_schema_change='sync_all_columns'` on incremental fact. |
+| Singular tests | Custom SQL | `tests/` directory is currently empty (no extra singular tests beyond the YAML-defined ones). |
 
 ---
 
